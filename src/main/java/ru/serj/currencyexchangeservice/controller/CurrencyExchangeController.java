@@ -31,7 +31,9 @@ public class CurrencyExchangeController {
                 BigDecimal.valueOf(65),
                 port);
 
-        return repository.findExchangeValueByFromAndTo(from, to);
+        ExchangeValue exchangeValueByFromAndTo = repository.findExchangeValueByFromAndTo(from, to);
+        exchangeValueByFromAndTo.setPort(port);
+        return exchangeValueByFromAndTo;
     }
 
 }
