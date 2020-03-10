@@ -1,5 +1,6 @@
 package ru.serj.currencyexchangeservice.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -12,6 +13,7 @@ import ru.serj.currencyexchangeservice.repository.ExchangeValueRepository;
 import java.math.BigDecimal;
 
 @RestController
+@Slf4j
 public class CurrencyExchangeController {
 
     @Autowired
@@ -33,6 +35,7 @@ public class CurrencyExchangeController {
 
         ExchangeValue exchangeValueByFromAndTo = repository.findExchangeValueByFromAndTo(from, to);
         exchangeValueByFromAndTo.setPort(port);
+        log.info("exchange value:{}", exchangeValueByFromAndTo);
         return exchangeValueByFromAndTo;
     }
 
