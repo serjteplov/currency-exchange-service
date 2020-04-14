@@ -6,15 +6,18 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8000:8000" #remove if --scale
     restart: always
     environment:
-      - SERVER_PORT=8000
-      - SPRING_RABBITMQ_ADDRESSES=rabbitmq:5672
-      - SPRING_ZIPKIN_BASE_URL=zipkin:9411
+      EUREKA_ADDRESS: http://eureka:8761/eureka
+      SERVER_PORT: 8000
+      SPRING_ZIPKIN_BASE_URL: http://zipkin:9411/
+      RABBITMQ_HOST: rabbitmq
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
     depends_on:
       - zipkin
       - rabbitmq
+      - eureka
     networks:
       - microservices-network
   conversion:
@@ -27,9 +30,47 @@ services:
     restart: always
     environment:
       SERVER_PORT: 8100
-      SPRING_RABBITMQ_ADDRESSES: rabbitmq:5672
-      SPRING_ZIPKIN_BASE_URL: zipkin:9411
+      EUREKA_ADDRESS: http://eureka:8761/eureka
+      SPRING_ZIPKIN_BASE_URL: http://zipkin:9411/
       CURRENCY_EXCHANGE_SERVICE_ADDRESS: http://exchange:8000
+      RABBITMQ_HOST: rabbitmq
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      - zipkin
+      - rabbitmq
+      - eureka
+    networks:
+      - microservices-network
+  zuul:
+    container_name: zuul
+    build:
+      context: ../zuul-gateway-server
+      dockerfile: Dockerfile
+    ports:
+      - "8765:8765"
+    restart: always
+    environment:
+      SERVER_PORT: 8765
+      EUREKA_ADDRESS: http://eureka:8761/eureka
+      RABBITMQ_HOST: rabbitmq
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+      SPRING_ZIPKIN_BASE_URL: http://zipkin:9411/
+    depends_on:
+      - zipkin
+      - rabbitmq
+      - eureka
+    networks:
+      - microservices-network
+  eureka:
+    container_name: eureka
+    build:
+      context: ../eureka-naming-server
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    restart: always
+    environment:
+      SERVER_PORT: 8761
     depends_on:
       - zipkin
       - rabbitmq
@@ -40,14 +81,20 @@ services:
     image: openzipkin/zipkin:latest
     ports:
       - "9411:9411"
+    environment:
+      STORAGE_TYPE: mem
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
     restart: always
+    depends_on:
+      - rabbitmq
     networks:
       - microservices-network
   rabbitmq:
     container_name: rabbitmq
-    image: rabbitmq:3
+    image: rabbitmq:3.5.3-management
     ports:
       - "5672:5672"
+      - "15672:15672"
     restart: always
     networks:
       - microservices-network

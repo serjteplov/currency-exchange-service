@@ -17,6 +17,7 @@ COPY --from=backend-build ${DEPENDENCY}/BOOT-INF/classes /app
 ENTRYPOINT ["java","-cp","app:app/lib/*",\
 "-Dserver.port=${SERVER_PORT}",\
 "-Dspring.zipkin.base-url=${SPRING_ZIPKIN_BASE_URL}",\
-"-Dspring.rabbitmq.addresses=${SPRING_RABBITMQ_ADDRESSES}",\
+"-Dspring.rabbitmq.host=${RABBITMQ_HOST}",\
+"-Deureka.client.serviceUrl.defaultZone=${EUREKA_ADDRESS}",\
 "ru.serj.currencyexchangeservice.CurrencyExchangeServiceApplication"]
 
