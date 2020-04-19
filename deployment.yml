@@ -1,0 +1,57 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: currency-exchange-service
+  name: currency-exchange-service
+  namespace: micro
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: currency-exchange-service
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      containers:
+      - image: serjteplov/currency-exchange-service:0.0.1-SNAPSHOT
+        imagePullPolicy: Always
+        name: currency-exchange-service
+        ports:
+          - name: liveness-port
+            containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: liveness-port
+          failureThreshold: 5
+          periodSeconds: 10
+          initialDelaySeconds: 50
+        env:
+          - name: SERVER_PORT
+            value: "8000"
+          - name: SPRING_RABBITMQ_HOST
+            value: rabbitmq
+          - name: RABBIT_URI
+            value: amqp://guest:guest@rabbitmq:5672
+          - name: SPRING_ZIPKIN_BASE_URL
+            value: http://zipkin:9411/
+          - name: SERVICE_URL_DEFAULT_ZONE
+            value: http://localhost666:666/eureka
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: currency-exchange-service
+  name: currency-exchange-service
+  namespace: micro
+spec:
+  type: NodePort # not LoadBalancer since we use ingress
+  ports:
+    - port: 8000
+      targetPort: 8000
+  selector:
+    app: currency-exchange-service
+  sessionAffinity: None

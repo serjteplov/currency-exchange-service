@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: gateway-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  namespace: micro
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /currency-exchange/*
+        backend:
+          serviceName: currency-exchange-service
+          servicePort: 8000          
+      - path: /currency-converter/*
+        backend:
+          serviceName: currency-conversion-service
+          servicePort: 8100
