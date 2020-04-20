@@ -6,7 +6,7 @@ metadata:
   name: currency-exchange-service
   namespace: micro
 spec:
-  replicas: 2 # remove if you want to autoscale
+  replicas: 1 # remove if you want to autoscale
   template:
     metadata:
       labels:
@@ -15,7 +15,7 @@ spec:
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       containers:
-      - image: serjteplov/currency-exchange-service:0.0.2-SNAPSHOT
+      - image: serjteplov/currency-exchange-service:0.0.3-SNAPSHOT
         imagePullPolicy: Always
         name: currency-exchange-service
         ports:
@@ -36,6 +36,8 @@ spec:
 #            cpu: 500m
 #            memory: 1024Mi
         env:
+          - name: SPRING_CLOUD_GCP_TRACE_ENABLED
+            value: "true"
           - name: SERVER_PORT
             value: "8000"
           - name: SPRING_RABBITMQ_HOST
